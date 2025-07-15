@@ -9,13 +9,15 @@ import VenuesPage from './pages/VenuesPage';
 import SponsorsPage from './pages/SponsorsPage';
 import PartnersPage from './pages/PartnersPage';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import OrganizerDashboard from './pages/OrganizerDashboard';
 import BecomeVendor from './pages/BecomeVendor';
 import AuthModal from './components/AuthModal';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 
 function AppContent() {
-  const { showAuthModal, loading } = useAuth();
+  const { showAuthModal, loading, user } = useAuth();
 
   if (loading) {
     return (
@@ -28,6 +30,20 @@ function AppContent() {
     );
   }
 
+  // Route to appropriate dashboard based on user role
+  const getDashboardRoute = () => {
+    if (!user) return <Dashboard />;
+    
+    switch (user.role) {
+      case 'admin':
+        return <AdminDashboard />;
+      case 'vendor':
+        return <OrganizerDashboard />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -39,8 +55,11 @@ function AppContent() {
           <Route path="/venues" element={<VenuesPage />} />
           <Route path="/sponsors" element={<SponsorsPage />} />
           <Route path="/partners" element={<PartnersPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={getDashboardRoute()} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/organizer" element={<OrganizerDashboard />} />
           <Route path="/become-organizer" element={<BecomeVendor />} />
+          <Route path="/become-vendor" element={<BecomeVendor />} />
         </Routes>
       </main>
       <Footer />

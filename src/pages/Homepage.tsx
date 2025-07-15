@@ -21,16 +21,23 @@ function Homepage() {
         .from('events')
         .select(`
           *,
-          profiles!events_vendor_id_fkey(full_name),
-          tickets(price)
+          organizer:users!events_organizer_id_fkey(full_name),
+          tickets(price),
+          category:event_categories(name, color)
         `)
-        .eq('is_published', true)
-        .gte('event_date', new Date().toISOString())
-        .order('event_date', { ascending: true })
+        .eq('status', 'published')
+        .gte('start_date', new Date().toISOString())
+        .order('start_date', { ascending: true })
         .limit(6);
 
+      // Fetch categories
+      const { data: categoriesData } = await supabase
+        .from('event_categories')
+        .select('*')
+        .order('name');
+
       setFeaturedEvents(events || []);
-      setCategories([]);
+      setCategories(categoriesData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -233,7 +240,7 @@ function Homepage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {(categories.length > 0 ? categories : defaultCategories).map((category, index) => {
               const IconComponent = getIconForCategory(category.name);
-              const colorClass = getColorForCategory(category.name);
+              const colorClass = category.color || getColorForCategory(category.name);
               
               return (
                 <Link
@@ -287,10 +294,10 @@ function Homepage() {
                     />
                     <div className="absolute top-4 left-4">
                       <span className="bg-white text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
-                        {event.category || 'Event'}
+                        {event.category?.name || 'Event'}
                       </span>
                     </div>
-                    {event.category === 'Awards & Nominations' && (
+                    {event.is_award_event && (
                       <div className="absolute top-4 right-4">
                         <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
                           <Trophy className="w-3 h-3 mr-1" />
@@ -306,7 +313,7 @@ function Homepage() {
                     <div className="flex items-center space-x-4 text-gray-600 mb-4">
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-4 h-4" />
-                        <span className="text-sm">{new Date(event.event_date).toLocaleDateString()}</span>
+                        <span className="text-sm">{new Date(event.start_date).toLocaleDateString()}</span>
                       </div>
                     </div>
                     
@@ -317,13 +324,13 @@ function Homepage() {
                     
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-purple-600">
-                        Free
+                        {event.is_free ? 'Free' : `₦${event.tickets?.[0]?.price?.toLocaleString() || '0'}`}
                       </span>
                       <Link
                         to={`/events/${event.id}`}
                         className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
                       >
-                        {event.category === 'Awards & Nominations' ? 'Vote Now' : 'Book Now'}
+                        {event.is_award_event ? 'Vote Now' : 'Book Now'}
                       </Link>
                     </div>
                   </div>
