@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import ResponsiveNavbar from './components/ResponsiveNavbar';
+import ResponsiveFooter from './components/ResponsiveFooter';
 import Homepage from './pages/Homepage';
 import EventDiscovery from './pages/EventDiscovery';
 import EventDetail from './pages/EventDetail';
@@ -12,7 +12,7 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import OrganizerDashboard from './pages/OrganizerDashboard';
 import BecomeVendor from './pages/BecomeVendor';
-import AuthModal from './components/AuthModal';
+import ResponsiveAuthModal from './components/ResponsiveAuthModal';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 
@@ -23,8 +23,8 @@ function AppContent() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading EventBuka...</p>
+          <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-sm sm:text-base">Loading EventBuka...</p>
         </div>
       </div>
     );
@@ -45,9 +45,9 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <ResponsiveNavbar />
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/events" element={<EventDiscovery />} />
@@ -62,8 +62,8 @@ function AppContent() {
           <Route path="/become-vendor" element={<BecomeVendor />} />
         </Routes>
       </main>
-      <Footer />
-      {showAuthModal && <AuthModal />}
+      <ResponsiveFooter />
+      {showAuthModal && <ResponsiveAuthModal />}
     </div>
   );
 }

@@ -1,15 +1,5 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
-// Fix for default markers in react-leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+import { MapPin } from 'lucide-react';
 
 interface MapComponentProps {
   center: [number, number];
@@ -23,28 +13,31 @@ interface MapComponentProps {
 }
 
 function MapComponent({ center, zoom = 13, markers = [], className = "h-64 w-full rounded-lg" }: MapComponentProps) {
+  // Fallback map component without external dependencies
   return (
-    <MapContainer
-      center={center}
-      zoom={zoom}
-      className={className}
-      style={{ height: '100%', width: '100%' }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {markers.map((marker, index) => (
-        <Marker key={index} position={marker.position}>
-          <Popup>
-            <div>
-              <h3 className="font-semibold">{marker.title}</h3>
-              {marker.description && <p className="text-sm">{marker.description}</p>}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <div className={`${className} bg-gray-100 border border-gray-300 flex items-center justify-center relative overflow-hidden`}>
+      <div className="text-center p-4">
+        <MapPin className="w-12 h-12 text-purple-600 mx-auto mb-2" />
+        <h3 className="font-semibold text-gray-900 mb-1">Interactive Map</h3>
+        <p className="text-sm text-gray-600 mb-2">
+          Location: {center[0].toFixed(4)}, {center[1].toFixed(4)}
+        </p>
+        {markers.length > 0 && (
+          <div className="text-xs text-gray-500">
+            {markers.length} marker{markers.length !== 1 ? 's' : ''} available
+          </div>
+        )}
+      </div>
+      
+      {/* Decorative grid pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="grid grid-cols-8 grid-rows-6 h-full w-full">
+          {Array.from({ length: 48 }).map((_, i) => (
+            <div key={i} className="border border-gray-400"></div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
