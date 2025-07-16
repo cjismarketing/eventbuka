@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ResponsiveNavbar from './components/ResponsiveNavbar';
 import ResponsiveFooter from './components/ResponsiveFooter';
+import DatabaseStatus from './components/DatabaseStatus';
 import Homepage from './pages/Homepage';
 import EventDiscovery from './pages/EventDiscovery';
 import EventDetail from './pages/EventDetail';
@@ -25,6 +26,7 @@ function AppContent() {
         <div className="text-center">
           <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 text-sm sm:text-base">Loading EventBuka...</p>
+          <p className="text-gray-500 text-xs sm:text-sm mt-2">Connecting to database...</p>
         </div>
       </div>
     );
@@ -63,6 +65,7 @@ function AppContent() {
         </Routes>
       </main>
       <ResponsiveFooter />
+      <DatabaseStatus />
       {showAuthModal && <ResponsiveAuthModal />}
     </div>
   );

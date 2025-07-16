@@ -4,7 +4,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -172,6 +172,7 @@ export interface Booking {
   // Relations
   event?: Event;
   ticket?: Ticket;
+  user?: User;
 }
 
 export interface Transaction {
@@ -223,64 +224,521 @@ export interface Partner {
   created_at: string;
 }
 
-export interface Hotel {
-  id: string;
-  name: string;
-  description?: string;
-  address: string;
-  city: string;
-  rating?: number;
-  price_per_night?: number;
-  amenities?: string[];
-  images?: string[];
-  contact_email?: string;
-  contact_phone?: string;
-  website?: string;
-  latitude?: number;
-  longitude?: number;
-  is_available: boolean;
-  created_at: string;
-}
-
 // Auth helper functions
 export const signInWithEmail = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  return { data, error };
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    if (error) {
+      console.error('Sign in error:', error);
+      return { data: null, error };
+    }
+    
+    return { data, error: null };
+  } catch (error) {
+    console.error('Sign in exception:', error);
+    return { data: null, error };
+  }
 };
 
 export const signUpWithEmail = async (email: string, password: string, fullName: string) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
       },
-    },
-  });
-  return { data, error };
+    });
+    
+    if (error) {
+      console.error('Sign up error:', error);
+      return { data: null, error };
+    }
+    
+    return { data, error: null };
+  } catch (error) {
+    console.error('Sign up exception:', error);
+    return { data: null, error };
+  }
 };
 
 export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  return { error };
+  try {
+    const { error } = await supabase.auth.signOut();
+    return { error };
+  } catch (error) {
+    console.error('Sign out error:', error);
+    return { error };
+  }
 };
 
 export const getCurrentUser = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error('Get user error:', error);
+      return null;
+    }
+    return user;
+  } catch (error) {
+    console.error('Get user exception:', error);
+    return null;
+  }
 };
 
 export const getUserProfile = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .single();
-  return { data, error };
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('Get user profile error:', error);
+      return { data: null, error };
+    }
+    
+    return { data, error: null };
+  } catch (error) {
+    console.error('Get user profile exception:', error);
+    return { data: null, error };
+  }
+};
+
+// Event functions
+export const getEvents = async (filters?: {
+  category?: string;
+  location?: string;
+  search?: string;
+  status?: string;
+  limit?: number;
+}) => {
+  try {
+    let query = supabase
+      .from('events')
+      .select(`
+        *,
+        organizer:users!events_organizer_id_fkey(full_name, email),
+        venue:venues(*),
+        category:event_categories(name, color),
+        tickets(*)
+      `)
+      .order('start_date', { ascending: true });
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    } else {
+      query = query.eq('status', 'published');
+    }
+
+    if (filters?.category) {
+      query = query.eq('category.name', filters.category);
+    }
+
+    if (filters?.location) {
+      query = query.ilike('city', `%${filters.location}%`);
+    }
+
+    if (filters?.search) {
+      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+    }
+
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Get events error:', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Get events exception:', error);
+    return { data: [], error };
+  }
+};
+
+export const getEventById = async (eventId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .select(`
+        *,
+        organizer:users!events_organizer_id_fkey(full_name, email),
+        venue:venues(*),
+        category:event_categories(name, color),
+        tickets(*)
+      `)
+      .eq('id', eventId)
+      .single();
+
+    if (error) {
+      console.error('Get event by ID error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Get event by ID exception:', error);
+    return { data: null, error };
+  }
+};
+
+export const createEvent = async (eventData: Partial<Event>) => {
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .insert([eventData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Create event error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Create event exception:', error);
+    return { data: null, error };
+  }
+};
+
+export const updateEvent = async (eventId: string, updates: Partial<Event>) => {
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .update(updates)
+      .eq('id', eventId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Update event error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Update event exception:', error);
+    return { data: null, error };
+  }
+};
+
+export const deleteEvent = async (eventId: string) => {
+  try {
+    const { error } = await supabase
+      .from('events')
+      .delete()
+      .eq('id', eventId);
+
+    if (error) {
+      console.error('Delete event error:', error);
+      return { error };
+    }
+
+    return { error: null };
+  } catch (error) {
+    console.error('Delete event exception:', error);
+    return { error };
+  }
+};
+
+// Booking functions
+export const createBooking = async (bookingData: Partial<Booking>) => {
+  try {
+    // Generate booking reference
+    const bookingReference = `EVB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    const { data, error } = await supabase
+      .from('bookings')
+      .insert([{
+        ...bookingData,
+        booking_reference: bookingReference,
+        status: 'pending'
+      }])
+      .select(`
+        *,
+        event:events(title, start_date, location),
+        ticket:tickets(name, price),
+        user:users(full_name, email)
+      `)
+      .single();
+
+    if (error) {
+      console.error('Create booking error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Create booking exception:', error);
+    return { data: null, error };
+  }
+};
+
+export const getUserBookings = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        event:events(title, start_date, location, image_url),
+        ticket:tickets(name, price)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Get user bookings error:', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Get user bookings exception:', error);
+    return { data: [], error };
+  }
+};
+
+export const updateBookingStatus = async (bookingId: string, status: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('bookings')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', bookingId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Update booking status error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Update booking status exception:', error);
+    return { data: null, error };
+  }
+};
+
+// Voting functions
+export const getNominationCategories = async (eventId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('nomination_categories')
+      .select('*')
+      .eq('event_id', eventId)
+      .order('name');
+
+    if (error) {
+      console.error('Get nomination categories error:', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Get nomination categories exception:', error);
+    return { data: [], error };
+  }
+};
+
+export const getNominees = async (categoryIds: string[]) => {
+  try {
+    const { data, error } = await supabase
+      .from('nominees')
+      .select(`
+        *,
+        category:nomination_categories(name)
+      `)
+      .in('category_id', categoryIds)
+      .eq('is_approved', true)
+      .order('vote_count', { ascending: false });
+
+    if (error) {
+      console.error('Get nominees error:', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Get nominees exception:', error);
+    return { data: [], error };
+  }
+};
+
+export const castVote = async (nomineeId: string, userId: string, categoryId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('votes')
+      .insert([{
+        nominee_id: nomineeId,
+        user_id: userId,
+        category_id: categoryId
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Cast vote error:', error);
+      return { data: null, error };
+    }
+
+    // Increment vote count
+    await supabase.rpc('increment_vote_count', { nominee_id: nomineeId });
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Cast vote exception:', error);
+    return { data: null, error };
+  }
+};
+
+// Transaction functions
+export const createTransaction = async (transactionData: Partial<Transaction>) => {
+  try {
+    const reference = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert([{
+        ...transactionData,
+        reference,
+        status: 'pending'
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Create transaction error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Create transaction exception:', error);
+    return { data: null, error };
+  }
+};
+
+export const updateUserWalletBalance = async (userId: string, amount: number) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ 
+        wallet_balance: amount,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Update wallet balance error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Update wallet balance exception:', error);
+    return { data: null, error };
+  }
+};
+
+// Venue functions
+export const getVenues = async (filters?: {
+  city?: string;
+  capacity?: number;
+  available?: boolean;
+}) => {
+  try {
+    let query = supabase
+      .from('venues')
+      .select('*')
+      .order('name');
+
+    if (filters?.city) {
+      query = query.ilike('city', `%${filters.city}%`);
+    }
+
+    if (filters?.capacity) {
+      query = query.gte('capacity', filters.capacity);
+    }
+
+    if (filters?.available !== undefined) {
+      query = query.eq('is_available', filters.available);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Get venues error:', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Get venues exception:', error);
+    return { data: [], error };
+  }
+};
+
+// Sponsor functions
+export const getSponsors = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('sponsors')
+      .select('*')
+      .eq('is_verified', true)
+      .order('company_name');
+
+    if (error) {
+      console.error('Get sponsors error:', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Get sponsors exception:', error);
+    return { data: [], error };
+  }
+};
+
+// Partner functions
+export const getPartners = async (serviceType?: string) => {
+  try {
+    let query = supabase
+      .from('partners')
+      .select('*')
+      .eq('is_verified', true)
+      .order('business_name');
+
+    if (serviceType && serviceType !== 'All Services') {
+      query = query.contains('services', [serviceType]);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Get partners error:', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Get partners exception:', error);
+    return { data: [], error };
+  }
 };
 
 // Utility functions
@@ -307,4 +765,64 @@ export const formatDateTime = (date: string) => {
     hour: '2-digit',
     minute: '2-digit',
   });
+};
+
+// Database health check
+export const checkDatabaseConnection = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('count')
+      .limit(1);
+
+    if (error) {
+      console.error('Database connection error:', error);
+      return { connected: false, error };
+    }
+
+    return { connected: true, error: null };
+  } catch (error) {
+    console.error('Database connection exception:', error);
+    return { connected: false, error };
+  }
+};
+
+// Test database functions
+export const testDatabaseFunctions = async () => {
+  console.log('🧪 Testing database functions...');
+  
+  try {
+    // Test connection
+    const connectionTest = await checkDatabaseConnection();
+    console.log('✅ Database connection:', connectionTest.connected ? 'OK' : 'FAILED');
+
+    // Test events fetch
+    const eventsTest = await getEvents({ limit: 1 });
+    console.log('✅ Events fetch:', eventsTest.data.length > 0 ? 'OK' : 'NO DATA');
+
+    // Test venues fetch
+    const venuesTest = await getVenues();
+    console.log('✅ Venues fetch:', venuesTest.data.length > 0 ? 'OK' : 'NO DATA');
+
+    // Test sponsors fetch
+    const sponsorsTest = await getSponsors();
+    console.log('✅ Sponsors fetch:', sponsorsTest.data.length >= 0 ? 'OK' : 'FAILED');
+
+    // Test partners fetch
+    const partnersTest = await getPartners();
+    console.log('✅ Partners fetch:', partnersTest.data.length >= 0 ? 'OK' : 'FAILED');
+
+    console.log('🎉 Database function tests completed!');
+    
+    return {
+      connection: connectionTest.connected,
+      events: eventsTest.data.length,
+      venues: venuesTest.data.length,
+      sponsors: sponsorsTest.data.length,
+      partners: partnersTest.data.length
+    };
+  } catch (error) {
+    console.error('❌ Database test failed:', error);
+    return null;
+  }
 };
