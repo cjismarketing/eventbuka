@@ -48,7 +48,9 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <ResponsiveNavbar />
+      <header role="banner">
+        <ResponsiveNavbar />
+      </header>
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Homepage />} />
@@ -64,7 +66,9 @@ function AppContent() {
           <Route path="/become-vendor" element={<BecomeVendor />} />
         </Routes>
       </main>
-      <ResponsiveFooter />
+      <footer role="contentinfo">
+        <ResponsiveFooter />
+      </footer>
       <DatabaseStatus />
       {showAuthModal && <ResponsiveAuthModal />}
     </div>

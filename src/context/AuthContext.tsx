@@ -73,44 +73,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log('🔄 Fetching user profile for:', userId);
       
-      const { data, error } = await getUserProfile(userId);
-
-      if (error) {
-        console.error('❌ Error fetching user profile:', error);
+      // Retry mechanism to handle race conditions with database triggers
+      let retries = 0;
+      const maxRetries = 5;
+      const retryDelay = 1000; // 1 second
+      
+      while (retries < maxRetries) {
+        const { data, error } = await getUserProfile(userId);
         
-        // If user doesn't exist in our users table, create them
-        if (error.code === 'PGRST116') {
-          const authUser = await getCurrentUser();
-          if (authUser) {
-            console.log('🔄 Creating new user profile...');
-            
-            const { error: insertError } = await supabase
-              .from('users')
-              .insert({
-                id: authUser.id,
-                email: authUser.email!,
-                full_name: authUser.user_metadata?.full_name || authUser.email,
-                role: 'user',
-                is_verified: false,
-                wallet_balance: 0.00
-              });
-            
-            if (!insertError) {
-              // Retry fetching the profile
-              const { data: newData } = await getUserProfile(userId);
-              if (newData) {
-                console.log('✅ User profile created and fetched');
-                setUser(newData);
-              }
-            } else {
-              console.error('❌ Error creating user profile:', insertError);
-            }
-          }
+        if (data) {
+          console.log('✅ User profile fetched:', data.email, data.role);
+          setUser(data);
+          return;
         }
-      } else if (data) {
-        console.log('✅ User profile fetched:', data.email, data.role);
-        setUser(data);
+        
+        if (error && error.code !== 'PGRST116') {
+          // If it's not a "row not found" error, don't retry
+          console.error('❌ Error fetching user profile:', error);
+          break;
+        }
+        
+        // If user profile not found, wait and retry (database trigger might still be processing)
+        retries++;
+        console.log(`🔄 User profile not found, retrying... (${retries}/${maxRetries})`);
+        
+        if (retries < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
       }
+      
+      console.error('❌ Failed to fetch user profile after retries');
     } catch (error) {
       console.error('❌ Exception fetching user profile:', error);
     } finally {

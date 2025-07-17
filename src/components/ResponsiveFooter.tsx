@@ -4,7 +4,7 @@ import { Calendar, Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } 
 
 function ResponsiveFooter() {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gray-900 text-white" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {/* Logo and Description */}
@@ -19,24 +19,24 @@ function ResponsiveFooter() {
               Your premier destination for discovering and booking amazing events. 
               From concerts to conferences, we've got you covered.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+            <div className="flex space-x-4" role="list" aria-label="Social media links">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Follow us on Facebook">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Follow us on Twitter">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Follow us on Instagram">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Subscribe to our YouTube channel">
                 <Youtube className="w-5 h-5" />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
+          <nav className="space-y-4" aria-label="Quick links">
             <h3 className="text-lg font-semibold">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
@@ -65,10 +65,10 @@ function ResponsiveFooter() {
                 </Link>
               </li>
             </ul>
-          </div>
+          </nav>
 
           {/* Categories */}
-          <div className="space-y-4">
+          <nav className="space-y-4" aria-label="Event categories">
             <h3 className="text-lg font-semibold">Categories</h3>
             <ul className="space-y-2 text-sm">
               <li>
@@ -97,19 +97,19 @@ function ResponsiveFooter() {
                 </Link>
               </li>
             </ul>
-          </div>
+          </nav>
 
           {/* Contact Info */}
-          <div className="space-y-4">
+          <div className="space-y-4" role="complementary" aria-label="Contact information">
             <h3 className="text-lg font-semibold">Contact Us</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <span className="text-gray-400">support@eventbuka.com</span>
+                <a href="mailto:support@eventbuka.com" className="text-gray-400 hover:text-white transition-colors">support@eventbuka.com</a>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <span className="text-gray-400">+234 800 123 4567</span>
+                <a href="tel:+2348001234567" className="text-gray-400 hover:text-white transition-colors">+234 800 123 4567</a>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -123,7 +123,7 @@ function ResponsiveFooter() {
           <p className="text-gray-400 text-sm text-center sm:text-left">
             © 2024 EventBuka. All rights reserved.
           </p>
-          <div className="flex flex-wrap justify-center sm:justify-end space-x-4 sm:space-x-6">
+          <nav className="flex flex-wrap justify-center sm:justify-end space-x-4 sm:space-x-6" aria-label="Legal links">
             <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors text-sm">
               Privacy Policy
             </Link>
@@ -133,7 +133,7 @@ function ResponsiveFooter() {
             <Link to="/cookies" className="text-gray-400 hover:text-white transition-colors text-sm">
               Cookie Policy
             </Link>
-          </div>
+          </nav>
         </div>
       </div>
     </footer>

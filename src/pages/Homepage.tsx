@@ -33,7 +33,7 @@ function Homepage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 text-white">
+      <section className="relative bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 text-white" role="banner" aria-label="Hero section">
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
           <div className="text-center">
@@ -50,7 +50,7 @@ function Homepage() {
             
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
-              <form onSubmit={handleSearch} className="bg-white rounded-2xl p-2 shadow-2xl">
+              <form onSubmit={handleSearch} className="bg-white rounded-2xl p-2 shadow-2xl" role="search" aria-label="Event search">
                 <div className="flex flex-col sm:flex-row gap-2">
                   <div className="flex-1 relative">
                     <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -60,6 +60,7 @@ function Homepage() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-12 pr-4 py-3 text-gray-900 bg-transparent focus:outline-none rounded-xl"
+                      aria-label="Search events, artists, venues"
                     />
                   </div>
                   <div className="flex-1 relative">
@@ -70,11 +71,13 @@ function Homepage() {
                       value={locationQuery}
                       onChange={(e) => setLocationQuery(e.target.value)}
                       className="w-full pl-12 pr-4 py-3 text-gray-900 bg-transparent focus:outline-none rounded-xl"
+                      aria-label="Search location"
                     />
                   </div>
                   <button 
                     type="submit"
                     className="bg-purple-600 text-white px-6 sm:px-8 py-3 rounded-xl hover:bg-purple-700 transition-colors font-medium"
+                    aria-label="Submit search"
                   >
                     Search
                   </button>
@@ -83,7 +86,7 @@ function Homepage() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center" role="group" aria-label="Main action buttons">
               <Link
                 to="/events"
                 className="inline-flex items-center justify-center px-6 sm:px-8 py-3 bg-white text-purple-600 rounded-xl hover:bg-gray-100 transition-colors font-medium"
@@ -110,8 +113,9 @@ function Homepage() {
       </section>
 
       {/* Quick Access Section */}
-      <section className="py-8 sm:py-12 bg-white border-b border-gray-200">
+      <section className="py-8 sm:py-12 bg-white border-b border-gray-200" aria-label="Quick access links">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="sr-only">Quick Access</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <Link
               to="/sponsors"
@@ -162,7 +166,7 @@ function Homepage() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-gray-50" aria-label="Event categories">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -173,7 +177,7 @@ function Homepage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6" role="list" aria-label="Event category list">
             {categories.map((category, index) => {
               const IconComponent = category.icon;
               
@@ -182,6 +186,7 @@ function Homepage() {
                   key={index}
                   to={`/events?category=${encodeURIComponent(category.name)}`}
                   className="group p-4 sm:p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  role="listitem"
                 >
                   <div className={`w-12 h-12 sm:w-16 sm:h-16 ${category.color} rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
                     <IconComponent className="w-6 h-6 sm:w-8 sm:h-8" />
@@ -200,7 +205,7 @@ function Homepage() {
       </section>
 
       {/* Featured Events */}
-      <section className="py-12 sm:py-16 bg-white">
+      <section className="py-12 sm:py-16 bg-white" aria-label="Featured events">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -212,15 +217,15 @@ function Homepage() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" aria-label="Loading events">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-gray-200 rounded-2xl h-80 animate-pulse"></div>
+                <div key={i} className="bg-gray-200 rounded-2xl h-80 animate-pulse" aria-label="Loading event"></div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" role="list" aria-label="Featured events list">
               {featuredEvents.map((event) => (
-                <div key={event.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <article key={event.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300" role="listitem">
                   <div className="relative">
                     <img
                       src={event.image_url || 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=800'}
@@ -264,12 +269,13 @@ function Homepage() {
                       <Link
                         to={`/events/${event.id}`}
                         className="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm sm:text-base"
+                        aria-label={`${event.is_award_event ? 'Vote for' : 'Book tickets for'} ${event.title}`}
                       >
                         {event.is_award_event ? 'Vote Now' : 'Book Now'}
                       </Link>
                     </div>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
@@ -287,7 +293,7 @@ function Homepage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+      <section className="py-12 sm:py-16 bg-gradient-to-r from-purple-600 to-indigo-600 text-white" aria-label="Call to action">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
             Ready to Host Your Event?
@@ -295,7 +301,7 @@ function Homepage() {
           <p className="text-lg sm:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto">
             Join thousands of event organizers who trust EventBuka to manage their events
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center" role="group" aria-label="Call to action buttons">
             <Link
               to="/become-organizer"
               className="inline-flex items-center justify-center px-6 sm:px-8 py-4 bg-white text-purple-600 rounded-xl hover:bg-gray-100 transition-colors font-medium text-base sm:text-lg"

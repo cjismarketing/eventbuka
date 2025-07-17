@@ -44,7 +44,7 @@ function ResponsiveNavbar() {
   };
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-white shadow-lg sticky top-0 z-50" role="navigation" aria-label="Main navigation">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -58,7 +58,7 @@ function ResponsiveNavbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6">
+          <div className="hidden lg:flex items-center space-x-6" role="menubar" aria-label="Primary navigation">
             <Link to="/events" className="text-gray-700 hover:text-purple-600 transition-colors font-medium">
               Events
             </Link>
@@ -77,7 +77,7 @@ function ResponsiveNavbar() {
           </div>
 
           {/* Desktop Search */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-2" role="search" aria-label="Event search">
             <form onSubmit={handleSearch} className="flex items-center space-x-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -87,11 +87,13 @@ function ResponsiveNavbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 pr-3 py-2 w-32 xl:w-48 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                  aria-label="Search events"
                 />
               </div>
               <button
                 type="submit"
                 className="bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                aria-label="Submit search"
               >
                 Search
               </button>
@@ -105,6 +107,7 @@ function ResponsiveNavbar() {
               <button className="hidden sm:block p-2 text-gray-600 hover:text-purple-600 transition-colors relative">
                 <Bell className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                <span className="sr-only">Notifications</span>
               </button>
             )}
 
@@ -113,6 +116,9 @@ function ResponsiveNavbar() {
               <button
                 onClick={handleAuthClick}
                 className="flex items-center space-x-2 bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                aria-expanded={user && isUserMenuOpen}
+                aria-haspopup="menu"
+                aria-label={user ? `User menu for ${user.full_name || user.email}` : "Sign in"}
               >
                 {user ? (
                   <>
@@ -133,11 +139,12 @@ function ResponsiveNavbar() {
 
               {/* User Dropdown */}
               {user && isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50" role="menu" aria-label="User menu">
                   <Link
                     to={getDashboardRoute()}
                     className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                     onClick={() => setIsUserMenuOpen(false)}
+                    role="menuitem"
                   >
                     <User className="w-4 h-4" />
                     <span>Dashboard</span>
@@ -146,6 +153,7 @@ function ResponsiveNavbar() {
                     to="/dashboard?tab=wallet"
                     className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                     onClick={() => setIsUserMenuOpen(false)}
+                    role="menuitem"
                   >
                     <Wallet className="w-4 h-4" />
                     <span>Wallet (₦{user.wallet_balance?.toLocaleString() || '0'})</span>
@@ -154,6 +162,7 @@ function ResponsiveNavbar() {
                   <button
                     onClick={handleLogout}
                     className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors w-full text-left"
+                    role="menuitem"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Logout</span>
@@ -166,6 +175,9 @@ function ResponsiveNavbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label="Toggle mobile menu"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -174,10 +186,10 @@ function ResponsiveNavbar() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-200">
+          <div className="lg:hidden py-4 border-t border-gray-200" id="mobile-menu" role="menu" aria-label="Mobile navigation menu">
             <div className="space-y-4">
               {/* Mobile Search */}
-              <form onSubmit={handleSearch} className="space-y-2">
+              <form onSubmit={handleSearch} className="space-y-2" role="search" aria-label="Mobile event search">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
@@ -186,6 +198,7 @@ function ResponsiveNavbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    aria-label="Search events"
                   />
                 </div>
                 <div className="relative">
@@ -196,11 +209,13 @@ function ResponsiveNavbar() {
                     value={locationQuery}
                     onChange={(e) => setLocationQuery(e.target.value)}
                     className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    aria-label="Search location"
                   />
                 </div>
                 <button
                   type="submit"
                   className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                  aria-label="Submit search"
                 >
                   Search Events
                 </button>
@@ -212,6 +227,7 @@ function ResponsiveNavbar() {
                   to="/events"
                   className="block py-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
+                  role="menuitem"
                 >
                   Events
                 </Link>
@@ -219,6 +235,7 @@ function ResponsiveNavbar() {
                   to="/venues"
                   className="block py-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
+                  role="menuitem"
                 >
                   Venues
                 </Link>
@@ -226,6 +243,7 @@ function ResponsiveNavbar() {
                   to="/sponsors"
                   className="block py-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
+                  role="menuitem"
                 >
                   Sponsors
                 </Link>
@@ -233,6 +251,7 @@ function ResponsiveNavbar() {
                   to="/partners"
                   className="block py-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
+                  role="menuitem"
                 >
                   Partners
                 </Link>
@@ -240,6 +259,7 @@ function ResponsiveNavbar() {
                   to="/become-organizer"
                   className="block py-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
+                  role="menuitem"
                 >
                   Become Organizer
                 </Link>
@@ -247,7 +267,7 @@ function ResponsiveNavbar() {
 
               {/* Mobile User Actions */}
               {user ? (
-                <div className="space-y-2 pt-4 border-t border-gray-200">
+                <div className="space-y-2 pt-4 border-t border-gray-200" role="group" aria-label="User account actions">
                   <div className="flex items-center space-x-3 py-2">
                     {user.avatar_url ? (
                       <img src={user.avatar_url} alt={user.full_name} className="w-8 h-8 rounded-full" />
@@ -265,6 +285,7 @@ function ResponsiveNavbar() {
                     to={getDashboardRoute()}
                     className="block py-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
+                    role="menuitem"
                   >
                     Dashboard
                   </Link>
@@ -277,6 +298,7 @@ function ResponsiveNavbar() {
                       setIsMenuOpen(false);
                     }}
                     className="block w-full text-left py-2 text-red-600 hover:text-red-700 transition-colors font-medium"
+                    role="menuitem"
                   >
                     Logout
                   </button>
@@ -288,6 +310,7 @@ function ResponsiveNavbar() {
                     setIsMenuOpen(false);
                   }}
                   className="block w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                  role="menuitem"
                 >
                   Sign In
                 </button>
