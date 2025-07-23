@@ -69,7 +69,7 @@ function AppContent() {
       <footer role="contentinfo">
         <ResponsiveFooter />
       </footer>
-      <DatabaseStatus />
+      {user?.role === 'admin' && <DatabaseStatus />}
       {showAuthModal && <ResponsiveAuthModal />}
     </div>
   );
