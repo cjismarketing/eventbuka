@@ -14,15 +14,6 @@ function ResponsiveAuthModal() {
   const [error, setError] = useState('');
   const { setShowAuthModal, signIn, signUp } = useAuth();
 
-  const testCredentials = [
-    { email: 'support@eventbuka.com', password: 'Eventbuka@0419', role: 'Super Admin' },
-    { email: 'organizer@eventbuka.com', password: 'Eventbuka@0419', role: 'Event Organizer' },
-    { email: 'vendor@eventbuka.com', password: 'Eventbuka@0419', role: 'Event Vendor' },
-    { email: 'sponsor@eventbuka.com', password: 'Eventbuka@0419', role: 'Corporate Sponsor' },
-    { email: 'partner@eventbuka.com', password: 'Eventbuka@0419', role: 'Business Partner' },
-    { email: 'user@eventbuka.com', password: 'Eventbuka@0419', role: 'Regular User' }
-  ];
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -53,11 +44,6 @@ function ResponsiveAuthModal() {
     });
   };
 
-  const handleTestLogin = (email: string, password: string) => {
-    setFormData({ ...formData, email, password });
-    setIsLogin(true);
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -72,24 +58,6 @@ function ResponsiveAuthModal() {
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
-        </div>
-
-        {/* Test Credentials */}
-        <div className="p-4 sm:p-6 bg-blue-50 border-b border-gray-200">
-          <h3 className="text-sm font-semibold text-blue-900 mb-3">Test Credentials</h3>
-          <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
-            {testCredentials.map((cred, index) => (
-              <button
-                key={index}
-                onClick={() => handleTestLogin(cred.email, cred.password)}
-                className="text-left p-2 bg-white rounded border hover:bg-blue-50 transition-colors"
-              >
-                <div className="text-xs font-medium text-blue-900">{cred.role}</div>
-                <div className="text-xs text-blue-700">{cred.email}</div>
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-blue-700 mt-2">Click any credential to auto-fill the form</p>
         </div>
 
         {/* Form */}
