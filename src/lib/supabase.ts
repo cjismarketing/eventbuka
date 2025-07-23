@@ -28,7 +28,6 @@ export interface User {
   role: 'admin' | 'organizer' | 'vendor' | 'sponsor' | 'partner';
   is_verified: boolean;
   wallet_balance: number;
-  stellar_address?: string;
   profile_data?: any;
   business_name?: string;
   business_type?: string;

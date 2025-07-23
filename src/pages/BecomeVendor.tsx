@@ -326,19 +326,6 @@ function BecomeVendor() {
                         required
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Stellar Wallet Address (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        name="stellarAddress"
-                        value={formData.bankDetails.stellarAddress}
-                        onChange={handleBankDetailsChange}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="Enter Stellar address"
-                      />
-                    </div>
                   </div>
                 </div>
 
