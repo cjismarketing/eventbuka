@@ -25,10 +25,11 @@ export interface User {
   full_name?: string;
   phone?: string;
   avatar_url?: string;
-  role: 'admin' | 'vendor' | 'user' | 'sponsor' | 'partner';
+  role: 'admin' | 'organizer' | 'vendor' | 'sponsor' | 'partner';
   is_verified: boolean;
   wallet_balance: number;
   stellar_address?: string;
+  profile_data?: any;
   business_name?: string;
   business_type?: string;
   company_name?: string;
@@ -42,6 +43,7 @@ export interface User {
   rating?: number;
   portfolio_urls?: string[];
   price_range?: string;
+  logo_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -234,7 +236,7 @@ export interface Partner {
 }
 
 // Auth helper functions
-export const signInWithEmail = async (email: string, password: string) => {
+export const signInWithEmail = async (email: string, password: string, role?: string) => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -253,7 +255,7 @@ export const signInWithEmail = async (email: string, password: string) => {
   }
 };
 
-export const signUpWithEmail = async (email: string, password: string, fullName: string) => {
+export const signUpWithEmail = async (email: string, password: string, fullName: string, role: string = 'organizer') => {
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -261,6 +263,7 @@ export const signUpWithEmail = async (email: string, password: string, fullName:
       options: {
         data: {
           full_name: fullName,
+          role: role,
         },
       },
     });
@@ -774,6 +777,115 @@ export const formatDateTime = (date: string) => {
     hour: '2-digit',
     minute: '2-digit',
   });
+};
+
+// Role-based helper functions
+export const getUsersByRole = async (role: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('role', role)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Get users by role error:', error);
+      return { data: [], error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Get users by role exception:', error);
+    return { data: [], error };
+  }
+};
+
+export const updateUserRole = async (userId: string, role: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ role, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Update user role error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Update user role exception:', error);
+    return { data: null, error };
+  }
+};
+
+export const verifyUser = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ is_verified: true, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Verify user error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error('Verify user exception:', error);
+    return { data: null, error };
+  }
+};
+
+// Permission matrix helper
+export const checkPermission = (userRole: string, action: string, resource: string): boolean => {
+  const permissions = {
+    admin: {
+      users: ['create', 'read', 'update', 'delete'],
+      events: ['create', 'read', 'update', 'delete'],
+      venues: ['create', 'read', 'update', 'delete'],
+      bookings: ['create', 'read', 'update', 'delete'],
+      transactions: ['create', 'read', 'update', 'delete'],
+      analytics: ['read'],
+    },
+    organizer: {
+      events: ['create', 'read', 'update', 'delete'], // own events only
+      venues: ['read'],
+      bookings: ['read'], // own event bookings only
+      tickets: ['create', 'read', 'update', 'delete'], // own event tickets only
+      analytics: ['read'], // own events only
+    },
+    vendor: {
+      events: ['create', 'read', 'update', 'delete'], // own events only
+      venues: ['read'],
+      bookings: ['read'], // own event bookings only
+      tickets: ['create', 'read', 'update', 'delete'], // own event tickets only
+      analytics: ['read'], // own events only
+    },
+    sponsor: {
+      events: ['read'],
+      sponsorships: ['create', 'read', 'update'],
+      analytics: ['read'], // sponsored events only
+    },
+    partner: {
+      events: ['read'],
+      partnerships: ['create', 'read', 'update'],
+      services: ['create', 'read', 'update'],
+    },
+  };
+
+  const userPermissions = permissions[userRole as keyof typeof permissions];
+  if (!userPermissions) return false;
+
+  const resourcePermissions = userPermissions[resource as keyof typeof userPermissions];
+  if (!resourcePermissions) return false;
+
+  return resourcePermissions.includes(action);
 };
 
 // Database health check

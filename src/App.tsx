@@ -39,6 +39,8 @@ function AppContent() {
     switch (user.role) {
       case 'admin':
         return <AdminDashboard />;
+      case 'organizer':
+        return <OrganizerDashboard />;
       case 'vendor':
         return <OrganizerDashboard />;
       default:

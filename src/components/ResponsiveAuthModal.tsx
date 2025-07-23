@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 function ResponsiveAuthModal() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('organizer');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -14,6 +15,12 @@ function ResponsiveAuthModal() {
   const [error, setError] = useState('');
   const { setShowAuthModal, signIn, signUp } = useAuth();
 
+  const roles = [
+    { value: 'organizer', label: 'Event Organizer', description: 'Create and manage events' },
+    { value: 'vendor', label: 'Event Vendor', description: 'Provide services for events' },
+    { value: 'sponsor', label: 'Event Sponsor', description: 'Sponsor events and grow your brand' },
+    { value: 'partner', label: 'Business Partner', description: 'Offer services to event organizers' },
+  ];
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -24,7 +31,7 @@ function ResponsiveAuthModal() {
       if (isLogin) {
         result = await signIn(formData.email, formData.password);
       } else {
-        result = await signUp(formData.email, formData.password, formData.fullName);
+        result = await signUp(formData.email, formData.password, formData.fullName, selectedRole);
       }
 
       if (result.error) {
@@ -90,6 +97,26 @@ function ResponsiveAuthModal() {
             </div>
           )}
 
+          {!isLogin && (
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+                Account Type
+              </label>
+              <select
+                id="role"
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                required={!isLogin}
+              >
+                {roles.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label} - {role.description}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email Address
@@ -176,6 +203,7 @@ function ResponsiveAuthModal() {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError('');
+                setSelectedRole('organizer');
                 setFormData({ fullName: '', email: '', password: '' });
               }}
               className="ml-2 text-purple-600 hover:text-purple-700 transition-colors font-medium"

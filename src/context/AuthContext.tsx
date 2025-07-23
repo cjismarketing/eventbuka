@@ -9,7 +9,7 @@ interface AuthContextType {
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error?: any }>;
+  signUp: (email: string, password: string, fullName: string, role?: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<{ error?: any }>;
   refreshUser: () => Promise<void>;
@@ -137,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     console.log('🔄 Signing up user:', email);
     
-    const { data, error } = await signUpWithEmail(email, password, fullName);
+    const { data, error } = await signUpWithEmail(email, password, fullName, role);
 
     if (!error && data) {
       console.log('✅ Sign up successful');

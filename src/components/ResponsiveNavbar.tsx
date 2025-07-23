@@ -38,6 +38,7 @@ function ResponsiveNavbar() {
     if (!user) return '/dashboard';
     switch (user.role) {
       case 'admin': return '/admin';
+      case 'organizer': return '/organizer';
       case 'vendor': return '/organizer';
       default: return '/dashboard';
     }

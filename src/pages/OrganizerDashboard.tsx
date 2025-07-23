@@ -117,12 +117,12 @@ function OrganizerDashboard() {
     }
   };
 
-  if (user?.role !== 'vendor') {
+  if (user?.role !== 'vendor' && user?.role !== 'organizer') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-          <p className="text-gray-600">You need to be an event organizer to access this page.</p>
+          <p className="text-gray-600">You need to be an event organizer or vendor to access this page.</p>
           <Link to="/become-organizer" className="mt-4 inline-block bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700">
             Become an Organizer
           </Link>
